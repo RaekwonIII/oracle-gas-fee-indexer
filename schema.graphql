@@ -1,6 +1,53 @@
-type Gravatar @entity(immutable: false) {
-  id: ID!
+# Raw, per-transaction record of gas fees paid by transactions that emitted a
+# ClusterBalanceUpdated event. Declared as a timeseries so it can feed native
+# aggregations. `id` and `timestamp` are populated automatically by graph-node.
+type GasFeePayment @entity(timeseries: true) {
+  id: Int8!
+  timestamp: Timestamp!
+  "Transaction sender — used as the aggregation dimension"
+  sender: Bytes!
+  "Gas fee paid for the transaction, in wei (gasUsed * gasPrice)"
+  gasFee: BigInt!
+  gasUsed: BigInt!
+  gasPrice: BigInt!
+  "Cluster owner emitted by the event"
   owner: Bytes!
-  displayName: String!
-  imageUrl: String!
+  txHash: Bytes!
+}
+
+# Native aggregation over GasFeePayment, grouped by `sender` (the dimension),
+# summing the gas fees paid in each interval.
+#
+# NOTE: The Graph only supports the "hour" and "day" intervals natively — there
+# is no "month" interval. "day" is the coarsest native granularity; true monthly
+# totals are maintained manually in MonthlyGasFeeBySender below.
+type SenderGasFeeStats
+  @aggregation(intervals: ["day"], source: "GasFeePayment") {
+  id: Int8!
+  timestamp: Timestamp!
+  "Aggregation dimension: transaction sender"
+  sender: Bytes!
+  "Sum of gas fees paid in the interval, in wei"
+  totalGasFees: BigInt! @aggregate(fn: "sum", arg: "gasFee")
+  "Number of ClusterBalanceUpdated transactions in the interval"
+  txCount: Int8! @aggregate(fn: "count")
+}
+
+# Manual monthly rollup of gas fees per sender. This exists because "month" is
+# not a supported native aggregation interval; we bucket events into calendar
+# months (UTC) ourselves in the mapping.
+type MonthlyGasFeeBySender @entity(immutable: false) {
+  "Composite id: <sender>-<YYYYMM>"
+  id: ID!
+  "Aggregation dimension: transaction sender"
+  sender: Bytes!
+  "Unix timestamp (seconds) of the first instant of the month, UTC"
+  monthStart: BigInt!
+  year: Int!
+  "Month number, 1-12"
+  month: Int!
+  "Sum of gas fees paid by this sender during the month, in wei"
+  totalGasFees: BigInt!
+  "Number of ClusterBalanceUpdated transactions by this sender in the month"
+  txCount: BigInt!
 }

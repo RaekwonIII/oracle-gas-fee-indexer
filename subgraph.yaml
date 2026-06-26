@@ -1,27 +1,31 @@
-specVersion: 0.0.4
-description: Gravatar for Ethereum
-repository: https://github.com/graphprotocol/graph-toolings
+specVersion: 1.1.0
+description: Indexes SSVNetwork ClusterBalanceUpdated events and the gas fees paid for them
+repository: https://github.com/RaekwonIII/oracle-gas-fee-indexer
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Gravity
+    name: SSVNetwork
     network: mainnet
     source:
-      address: '0x2E645469f354BB4F5c8a05B3b30A929361cf77eC'
-      abi: Gravity
+      address: '0xDD9BC35aE942eF0cFa76930954a156B3fF30a4E1'
+      abi: SSVNetwork
+      # SSVNetwork mainnet deployment block — adjust if you need earlier/later coverage.
+      startBlock: 17507487
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.6
+      apiVersion: 0.0.9
       language: wasm/assemblyscript
       entities:
-        - Gravatar
+        - GasFeePayment
+        - SenderGasFeeStats
+        - MonthlyGasFeeBySender
       abis:
-        - name: Gravity
-          file: ./artifacts/contracts/Gravity.sol/GravatarRegistry.json
+        - name: SSVNetwork
+          file: ./abis/SSVNetwork.json
       eventHandlers:
-        - event: NewGravatar(uint256,address,string,string)
-          handler: handleNewGravatar
-        - event: UpdatedGravatar(uint256,address,string,string)
-          handler: handleUpdatedGravatar
+        - event: ClusterBalanceUpdated(indexed address,uint64[],indexed uint64,uint32,(uint32,uint64,uint64,bool,uint256))
+          handler: handleClusterBalanceUpdated
+          # Required so we can read the transaction receipt (gasUsed) in the handler.
+          receipt: true
       file: ./src/mapping.ts
