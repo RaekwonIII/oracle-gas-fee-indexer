@@ -1,0 +1,20 @@
+{
+  "name": "oracle-gas-fee-indexer",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "graph build",
+    "build:contract": "hardhat compile",
+    "codegen": "graph codegen",
+    "create": "graph create oracle-gas-fee-indexer --node https://api.studio.thegraph.com/deploy/",
+    "create-local": "graph create oracle-gas-fee-indexer --node http://127.0.0.1:8020",
+    "deploy": "graph deploy oracle-gas-fee-indexer --ipfs https://api.thegraph.com/ipfs/ --node https://api.studio.thegraph.com/deploy/",
+    "deploy-local": "graph deploy oracle-gas-fee-indexer --ipfs http://127.0.0.1:5001 --node http://127.0.0.1:8020"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "0.90.1",
+    "@graphprotocol/graph-ts": "0.35.1",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.17"
+  }
+}
