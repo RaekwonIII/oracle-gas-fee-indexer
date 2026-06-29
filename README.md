@@ -1,6 +1,6 @@
 # oracle-gas-fee-indexer
 
-A subgraph that indexes the **`ClusterBalanceUpdated`** and **`RootCommitted`**
+A subgraph that indexes the **`ClusterBalanceUpdated`** and **`WeightedRootProposed`**
 events of the SSVNetwork contract on Ethereum mainnet
 ([`0xDD9BC35aE942eF0cFa76930954a156B3fF30a4E1`](https://etherscan.io/address/0xDD9BC35aE942eF0cFa76930954a156B3fF30a4E1))
 and computes the **gas fee paid for each emitting transaction**, then rolls those
@@ -8,7 +8,7 @@ fees up per transaction sender.
 
 ## What it indexes
 
-The `ClusterBalanceUpdated` and `RootCommitted` events are handled identically:
+The `ClusterBalanceUpdated` and `WeightedRootProposed` events are handled identically:
 each emitting transaction contributes its gas fee to the sender's totals. For
 every occurrence the handler reads the **transaction receipt** (enabled via
 `receipt: true` in the manifest) and computes:
@@ -25,7 +25,7 @@ gasFee = receipt.gasUsed * transaction.gasPrice   // in wei
 
 | Entity | Purpose |
 | --- | --- |
-| `GasFeePayment` | `@entity(timeseries: true)` — one immutable data point per indexed event (sender, gasFee, gasUsed, gasPrice, owner [null for `RootCommitted`], txHash). `id`/`timestamp` are auto-managed by graph-node. |
+| `GasFeePayment` | `@entity(timeseries: true)` — one immutable data point per indexed event (sender, gasFee, gasUsed, gasPrice, owner [null for `WeightedRootProposed`], txHash). `id`/`timestamp` are auto-managed by graph-node. |
 | `SenderGasFeeStats` | `@aggregation` over `GasFeePayment`, grouped by the `sender` dimension, summing `gasFee` (`@aggregate(fn: "sum")`). |
 | `MonthlyGasFeeBySender` | Manual monthly rollup of total gas fees per sender. |
 

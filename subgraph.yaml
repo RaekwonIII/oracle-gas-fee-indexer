@@ -26,10 +26,9 @@ dataSources:
         - event: ClusterBalanceUpdated(indexed address,uint64[],indexed
             uint64,uint32,(uint32,uint64,uint64,bool,uint256))
           handler: handleClusterBalanceUpdated
-          # Required so we can read the transaction receipt (gasUsed) in the handler.
           receipt: true
-        - event: RootCommitted(indexed bytes32,indexed uint64)
-          handler: handleRootCommitted
+        - event: WeightedRootProposed(indexed bytes32,indexed uint64,uint256,uint256,uint32,address)
+          handler: handleWeightedRootProposed
           # Required so we can read the transaction receipt (gasUsed) in the handler.
           receipt: true
       file: ./src/mapping.ts

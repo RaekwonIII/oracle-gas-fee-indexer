@@ -1,7 +1,7 @@
 import { BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import {
   ClusterBalanceUpdated,
-  RootCommitted,
+  WeightedRootProposed,
 } from '../generated/SSVNetwork/SSVNetwork';
 import { GasFeePayment, MonthlyGasFeeBySender } from '../generated/schema';
 
@@ -50,8 +50,8 @@ export function handleClusterBalanceUpdated(event: ClusterBalanceUpdated): void 
   recordGasFee(event, event.params.owner);
 }
 
-export function handleRootCommitted(event: RootCommitted): void {
-  // RootCommitted carries no owner; the gas fee still counts toward the sender.
+export function handleWeightedRootProposed(event: WeightedRootProposed): void {
+  // WeightedRootProposed carries no owner; the gas fee still counts toward the sender.
   recordGasFee(event, null);
 }
 
