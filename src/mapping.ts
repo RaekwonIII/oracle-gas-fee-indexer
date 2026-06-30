@@ -1,8 +1,5 @@
-import { BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
-import {
-  ClusterBalanceUpdated,
-  WeightedRootProposed,
-} from '../generated/SSVNetwork/SSVNetwork';
+import { BigInt } from '@graphprotocol/graph-ts';
+import { WeightedRootProposed } from '../generated/SSVNetwork/SSVNetwork';
 import { GasFeePayment, MonthlyGasFeeBySender } from '../generated/schema';
 
 const SECONDS_PER_DAY: i64 = 86400;
@@ -46,19 +43,11 @@ function daysFromCivil(y: i64, m: i64, d: i64): i64 {
   return era * 146097 + doe - 719468;
 }
 
-export function handleClusterBalanceUpdated(event: ClusterBalanceUpdated): void {
-  recordGasFee(event, event.params.owner);
-}
-
+// Records the gas fee paid for the transaction that emitted a successful
+// WeightedRootProposed (oracle root submission) and adds it to the sender's
+// totals. Events are only emitted for successful transactions, so every emitted
+// event is counted.
 export function handleWeightedRootProposed(event: WeightedRootProposed): void {
-  // WeightedRootProposed carries no owner; the gas fee still counts toward the sender.
-  recordGasFee(event, null);
-}
-
-// Records the gas fee paid for the transaction that emitted `event` and adds it
-// to the sender's totals. Shared by every indexed event so they contribute
-// identically; `owner` is the cluster owner when the event provides one.
-function recordGasFee(event: ethereum.Event, owner: Bytes | null): void {
   // The receipt is requested via `receipt: true` in the manifest; guard anyway.
   let receipt = event.receipt;
   if (receipt == null) {
@@ -80,7 +69,6 @@ function recordGasFee(event: ethereum.Event, owner: Bytes | null): void {
   payment.gasFee = gasFee;
   payment.gasUsed = gasUsed;
   payment.gasPrice = gasPrice;
-  payment.owner = owner;
   payment.txHash = event.transaction.hash;
   payment.save();
 

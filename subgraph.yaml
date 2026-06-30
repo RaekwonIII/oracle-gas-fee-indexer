@@ -1,5 +1,5 @@
 specVersion: 1.1.0
-description: Indexes SSVNetwork ClusterBalanceUpdated events and the gas fees paid for them
+description: Indexes SSVNetwork WeightedRootProposed events (successful oracle root submissions) and the gas fees paid for them
 repository: https://github.com/RaekwonIII/oracle-gas-fee-indexer
 schema:
   file: ./schema.graphql
@@ -23,10 +23,6 @@ dataSources:
         - name: SSVNetwork
           file: ./abis/SSVNetwork.json
       eventHandlers:
-        - event: ClusterBalanceUpdated(indexed address,uint64[],indexed
-            uint64,uint32,(uint32,uint64,uint64,bool,uint256))
-          handler: handleClusterBalanceUpdated
-          receipt: true
         - event: WeightedRootProposed(indexed bytes32,indexed uint64,uint256,uint256,uint32,address)
           handler: handleWeightedRootProposed
           # Required so we can read the transaction receipt (gasUsed) in the handler.
