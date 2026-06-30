@@ -1,5 +1,5 @@
 # Raw, per-transaction record of gas fees paid by transactions that emitted a
-# ClusterBalanceUpdated event. Declared as a timeseries so it can feed native
+# WeightedRootProposed event. Declared as a timeseries so it can feed native
 # aggregations. `id` and `timestamp` are populated automatically by graph-node.
 type GasFeePayment @entity(timeseries: true) {
   id: Int8!
@@ -10,8 +10,6 @@ type GasFeePayment @entity(timeseries: true) {
   gasFee: BigInt!
   gasUsed: BigInt!
   gasPrice: BigInt!
-  "Cluster owner emitted by ClusterBalanceUpdated; null for events without one (e.g. RootCommitted)"
-  owner: Bytes
   txHash: Bytes!
 }
 
@@ -29,7 +27,7 @@ type SenderGasFeeStats
   sender: Bytes!
   "Sum of gas fees paid in the interval, in wei"
   totalGasFees: BigInt! @aggregate(fn: "sum", arg: "gasFee")
-  "Number of ClusterBalanceUpdated transactions in the interval"
+  "Number of WeightedRootProposed transactions in the interval"
   txCount: Int8! @aggregate(fn: "count")
 }
 
@@ -48,6 +46,6 @@ type MonthlyGasFeeBySender @entity(immutable: false) {
   month: Int!
   "Sum of gas fees paid by this sender during the month, in wei"
   totalGasFees: BigInt!
-  "Number of ClusterBalanceUpdated transactions by this sender in the month"
+  "Number of WeightedRootProposed transactions by this sender in the month"
   txCount: BigInt!
 }
